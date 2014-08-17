@@ -1,7 +1,10 @@
 -- | Monads with variables.
-module Control.Monad.Variables(Variable(Variable, load, store), MonadVar) where
+module Control.Monad.Variables(Variable(Variable, load, store),
+                               MonadVar,
+                               stateVar) where
 
 import Data.IORef
+import Control.Monad.State.Class
 
 -- | The type of variables. In contrast with other "monads-with-variables"
 -- packages, this is not done using type families.
@@ -17,4 +20,9 @@ instance MonadVar IO where
   newVar x = do var <- newIORef x
                 return Variable { load = readIORef var,
                                   store = writeIORef var }
+
+-- | Access a variable representing the state of a state monad.
+stateVar :: MonadState s m => Variable m s
+stateVar = Variable { load = get,
+                      store = put }
 
