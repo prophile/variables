@@ -9,7 +9,9 @@ import Data.IORef
 import Data.STRef
 
 -- From mtl
+import Control.Monad.Trans
 import Control.Monad.State.Class
+import Control.Monad.Reader
 
 -- From stm
 import Control.Concurrent.STM
@@ -39,6 +41,15 @@ instance MonadVar STM where
   newVar x = do var <- newTVar x
                 return Variable { load  = readTVar var,
                                   store = writeTVar var }
+
+-- Instances for mtl/transformers monad transformers.
+liftNewVar :: (MonadTrans t, MonadVar m, Monad (t m)) => a -> t m (Variable (t m) a)
+liftNewVar x = do lowerVariable <- lift (newVar x)
+                  return Variable { load  = lift (load lowerVariable),
+                                    store = lift . store lowerVariable }
+
+instance MonadVar m => MonadVar (ReaderT r m) where
+  newVar = liftNewVar
 
 -- | Access a variable representing the state of a state monad.
 stateVar :: MonadState s m => Variable m s
