@@ -1,4 +1,4 @@
-variables 0.1.0
+variables 0.1.1
 ===============
 
 There have been a number of "monads-with-variables" implementations
