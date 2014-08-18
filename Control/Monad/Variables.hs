@@ -15,6 +15,8 @@ import Control.Monad.State.Class
 import Control.Monad.Reader
 import qualified Control.Monad.Writer.Lazy as WL
 import qualified Control.Monad.Writer.Strict as WS
+import qualified Control.Monad.State.Lazy as SL
+import qualified Control.Monad.State.Strict as SS
 
 -- From stm
 import Control.Concurrent.STM
@@ -58,6 +60,12 @@ instance (MonadVar m, Monoid w) => MonadVar (WS.WriterT w m) where
   newVar = liftNewVar
 
 instance (MonadVar m, Monoid w) => MonadVar (WL.WriterT w m) where
+  newVar = liftNewVar
+
+instance MonadVar m => MonadVar (SS.StateT s m) where
+  newVar = liftNewVar
+
+instance MonadVar m => MonadVar (SL.StateT s m) where
   newVar = liftNewVar
 
 -- | Access a variable representing the state of a state monad.
