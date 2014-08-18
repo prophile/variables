@@ -17,6 +17,8 @@ import qualified Control.Monad.Writer.Lazy as WL
 import qualified Control.Monad.Writer.Strict as WS
 import qualified Control.Monad.State.Lazy as SL
 import qualified Control.Monad.State.Strict as SS
+import qualified Control.Monad.RWS.Lazy as RWSL
+import qualified Control.Monad.RWS.Strict as RWSS
 
 -- From stm
 import Control.Concurrent.STM
@@ -66,6 +68,12 @@ instance MonadVar m => MonadVar (SS.StateT s m) where
   newVar = liftNewVar
 
 instance MonadVar m => MonadVar (SL.StateT s m) where
+  newVar = liftNewVar
+
+instance (MonadVar m, Monoid w) => MonadVar (RWSS.RWST r w s m) where
+  newVar = liftNewVar
+
+instance (MonadVar m, Monoid w) => MonadVar (RWSL.RWST r w s m) where
   newVar = liftNewVar
 
 -- | Access a variable representing the state of a state monad.
