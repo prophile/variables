@@ -7,6 +7,11 @@ import Test.QuickCheck.Function
 import Control.Monad.Variables
 
 import Control.Concurrent.STM
+import Control.Monad.ST
+import Control.Monad.ST.Unsafe(unsafeSTToIO)
+
+import Control.Monad.Reader
+import Control.Monad.Cont
 
 baseTests :: (MonadVar m) => (m Int -> IO Int) -> Spec
 baseTests run = do
@@ -27,4 +32,7 @@ main :: IO ()
 main = hspec $ do
   describe "the IO instance" $ baseTests id
   describe "the STM instance" $ baseTests atomically
+  describe "the ST instance" $ baseTests unsafeSTToIO
+  describe "the ReaderT lifted instance" $ baseTests $ (`runReaderT` ())
+  describe "the ContT lifted instance" $ baseTests $ (`runContT` return)
 
