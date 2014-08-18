@@ -1,6 +1,6 @@
 -- | Monads with variables.
 module Control.Monad.Variables(Variable(Variable, readVar, writeVar),
-                               MonadVar,
+                               MonadVar(newVar),
                                stateVar) where
 
 -- From base
