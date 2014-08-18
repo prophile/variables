@@ -7,7 +7,7 @@ import Test.QuickCheck.Function
 import Control.Monad.Variables
 
 import Control.Concurrent.STM
-import Control.Monad.ST
+import Control.Monad.ST hiding (unsafeSTToIO)
 import Control.Monad.ST.Unsafe(unsafeSTToIO)
 
 import Control.Monad.Reader
