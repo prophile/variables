@@ -8,29 +8,23 @@ import Control.Monad.Variables
 
 import Control.Concurrent.STM
 
-main :: IO ()
-main = hspec $ do
-  describe "the IO instance" $ do
-    it "supports variable creation" $ do
+baseTests :: (MonadVar m) => (m Int -> IO Int) -> Spec
+baseTests run = do
+  it "supports variable creation" $ do
+    result <- run $ do
       var <- newVar 2
-      readVar var `shouldReturn` 2
+      readVar var
+    result `shouldBe` 2
 
-    it "supports variable modification" $ do
+  it "supports variable modification" $ do
+    result <- run $ do
       var <- newVar 2
       writeVar var 3
-      readVar var `shouldReturn` 3
+      readVar var
+    result `shouldBe` 3
 
-  describe "the STM instance" $ do
-    it "supports variable creation" $ do
-      result <- atomically $ do
-        var <- newVar 2
-        readVar var
-      result `shouldBe` 2
-
-    it "supports variable modification" $ do
-      result <- atomically $ do
-        var <- newVar 2
-        writeVar var 3
-        readVar var
-      result `shouldBe` 3
+main :: IO ()
+main = hspec $ do
+  describe "the IO instance" $ baseTests id
+  describe "the STM instance" $ baseTests atomically
 
