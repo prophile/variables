@@ -30,7 +30,7 @@ import Control.Concurrent.STM
 data Variable m a = Variable { readVar  :: m a,
                                writeVar :: a -> m () }
 
--- | Monads which admit general variables.
+-- | Monads which have general variables.
 class Monad m => MonadVar m where
   -- | Create a variable from an initial value.
   newVar :: a -> m (Variable m a)
