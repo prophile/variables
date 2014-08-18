@@ -1,5 +1,5 @@
 -- | Monads with variables.
-module Control.Monad.Variables(Variable(Variable, load, store),
+module Control.Monad.Variables(Variable(Variable, readVar, writeVar),
                                MonadVar,
                                stateVar) where
 
@@ -20,14 +20,15 @@ import qualified Control.Monad.State.Strict as SS
 import qualified Control.Monad.RWS.Lazy as RWSL
 import qualified Control.Monad.RWS.Strict as RWSS
 import qualified Control.Monad.Error as E
+import Control.Monad.Cont
 
 -- From stm
 import Control.Concurrent.STM
 
 -- | The type of variables. In contrast with other "monads-with-variables"
 -- packages, this is not done using type families.
-data Variable m a = Variable { load  :: m a,
-                               store :: a -> m () }
+data Variable m a = Variable { readVar  :: m a,
+                               writeVar :: a -> m () }
 
 -- | Monads which admit general variables.
 class Monad m => MonadVar m where
@@ -37,24 +38,24 @@ class Monad m => MonadVar m where
 -- Base instances
 instance MonadVar IO where
   newVar x = do var <- newIORef x
-                return Variable { load  = readIORef var,
-                                  store = writeIORef var }
+                return Variable { readVar  = readIORef var,
+                                  writeVar = writeIORef var }
 
 instance MonadVar (ST s) where
   newVar x = do var <- newSTRef x
-                return Variable { load  = readSTRef var,
-                                  store = writeSTRef var }
+                return Variable { readVar  = readSTRef var,
+                                  writeVar = writeSTRef var }
 
 instance MonadVar STM where
   newVar x = do var <- newTVar x
-                return Variable { load  = readTVar var,
-                                  store = writeTVar var }
+                return Variable { readVar  = readTVar var,
+                                  writeVar = writeTVar var }
 
 -- Instances for mtl/transformers monad transformers.
 liftNewVar :: (MonadTrans t, MonadVar m, Monad (t m)) => a -> t m (Variable (t m) a)
 liftNewVar x = do lowerVariable <- lift (newVar x)
-                  return Variable { load  = lift (load lowerVariable),
-                                    store = lift . store lowerVariable }
+                  return Variable { readVar  = lift (readVar lowerVariable),
+                                    writeVar = lift . writeVar lowerVariable }
 
 instance MonadVar m => MonadVar (ReaderT r m) where
   newVar = liftNewVar
@@ -80,8 +81,11 @@ instance (MonadVar m, Monoid w) => MonadVar (RWSL.RWST r w s m) where
 instance (MonadVar m, E.Error e) => MonadVar (E.ErrorT e m) where
   newVar = liftNewVar
 
+instance MonadVar m => MonadVar (ContT r m) where
+  newVar = liftNewVar
+
 -- | Access a variable representing the state of a state monad.
 stateVar :: MonadState s m => Variable m s
-stateVar = Variable { load = get,
-                      store = put }
+stateVar = Variable { readVar  = get,
+                      writeVar = put }
 
