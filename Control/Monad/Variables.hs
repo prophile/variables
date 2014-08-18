@@ -7,11 +7,14 @@ module Control.Monad.Variables(Variable(Variable, load, store),
 import Control.Monad.ST
 import Data.IORef
 import Data.STRef
+import Data.Monoid
 
 -- From mtl
 import Control.Monad.Trans
 import Control.Monad.State.Class
 import Control.Monad.Reader
+import qualified Control.Monad.Writer.Lazy as WL
+import qualified Control.Monad.Writer.Strict as WS
 
 -- From stm
 import Control.Concurrent.STM
@@ -49,6 +52,12 @@ liftNewVar x = do lowerVariable <- lift (newVar x)
                                     store = lift . store lowerVariable }
 
 instance MonadVar m => MonadVar (ReaderT r m) where
+  newVar = liftNewVar
+
+instance (MonadVar m, Monoid w) => MonadVar (WS.WriterT w m) where
+  newVar = liftNewVar
+
+instance (MonadVar m, Monoid w) => MonadVar (WL.WriterT w m) where
   newVar = liftNewVar
 
 -- | Access a variable representing the state of a state monad.
