@@ -1,5 +1,5 @@
 name:                variables
-version:             0.1.1
+version:             0.1.2
 synopsis:            Monads with variables, without deep magic
 homepage:            https://github.com/prophile/variables
 license:             MIT
