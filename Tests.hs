@@ -8,6 +8,7 @@ import Test.QuickCheck.Function
 
 import Control.Monad.Variables
 import Control.Monad.Variables.File
+import Control.Monad.Variables.Lens
 
 import Control.Concurrent.STM
 import Control.Monad.ST hiding (unsafeSTToIO)
@@ -15,6 +16,8 @@ import Control.Monad.ST.Unsafe(unsafeSTToIO)
 
 import Control.Monad.Reader
 import Control.Monad.Cont
+
+import Control.Lens
 
 import qualified Data.ByteString as BS
 
@@ -49,5 +52,14 @@ main = hspec $ do
     it "can write files" $ do
       writeVar var "gravity"
       BS.readFile fn `shouldReturn` "gravity"
-
+  describe "with lenses" $ do
+    it "reads" $ do
+      var <- newVar (3, "pony")
+      let var' = var `through` _2
+      readVar var' `shouldReturn` "pony"
+    it "writes" $ do
+      var <- newVar (3, "pony")
+      let var' = var `through` _2
+      writeVar var' "horse"
+      readVar var `shouldReturn` (3, "horse")
 

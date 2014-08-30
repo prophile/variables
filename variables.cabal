@@ -13,7 +13,8 @@ cabal-version:       >=1.10
 
 library
   exposed-modules:     Control.Monad.Variables,
-                       Control.Monad.Variables.File
+                       Control.Monad.Variables.File,
+                       Control.Monad.Variables.Lens
   build-depends:       base >=4.6 && <4.8,
                        mtl >= 2 && <3,
                        stm >= 2.4 && <3,
@@ -31,5 +32,6 @@ test-suite tests
                        mtl >= 2 && <3,
                        stm >= 2.4 && <3,
                        transformers >= 0.3 && <0.4,
-                       bytestring >= 0.10 && <0.11
+                       bytestring >= 0.10 && <0.11,
+                       lens >= 4.3 && <5
 
