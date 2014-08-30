@@ -1,3 +1,5 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 module Main(main) where
 
 import Test.Hspec
@@ -5,6 +7,7 @@ import Test.QuickCheck
 import Test.QuickCheck.Function
 
 import Control.Monad.Variables
+import Control.Monad.Variables.File
 
 import Control.Concurrent.STM
 import Control.Monad.ST hiding (unsafeSTToIO)
@@ -12,6 +15,8 @@ import Control.Monad.ST.Unsafe(unsafeSTToIO)
 
 import Control.Monad.Reader
 import Control.Monad.Cont
+
+import qualified Data.ByteString as BS
 
 baseTests :: (MonadVar m) => (m Int -> IO Int) -> Spec
 baseTests run = do
@@ -35,4 +40,14 @@ main = hspec $ do
   describe "the ST instance" $ baseTests unsafeSTToIO
   describe "the ReaderT lifted instance" $ baseTests $ (`runReaderT` ())
   describe "the ContT lifted instance" $ baseTests $ (`runContT` return)
+  describe "file" $ do
+    let fn = "/tmp/variables-var-test"
+    let var = file fn
+    it "can read files" $ do
+      BS.writeFile fn "bees"
+      readVar var `shouldReturn` "bees"
+    it "can write files" $ do
+      writeVar var "gravity"
+      BS.readFile fn `shouldReturn` "gravity"
+
 
